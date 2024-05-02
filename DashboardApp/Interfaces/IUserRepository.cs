@@ -9,8 +9,8 @@ namespace DashboardApp.Interfaces
         Task<List<User>> GetAllAsync(QueryObject query);
         Task<User?> GetByIdAsync(int id);
         Task<User?> GetByUserNameAsync(string symbol);
-        Task<User> CreateAsync(User stockModel);
-        Task<User?> UpdateAsync(int id, UpdateUserRequestDto stockDto);
+        Task<User> CreateAsync(User userModel);
+        Task<User?> UpdateAsync(int id, UpdateUserRequestDto userDto);
         Task<User?> DeleteAsync(int id);
         Task<bool> UserExistsAsync(int id);
     }

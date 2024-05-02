@@ -75,23 +75,23 @@ namespace DashboardApp.Repositories
 
         public async Task<User?> UpdateAsync(int id, UpdateUserRequestDto userDto)
         {
-            var existingStock = await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
+            var existingUser = await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
 
-            if (existingStock == null)
+            if (existingUser == null)
             {
                 return null;
             }
 
-            existingStock.UserName = userDto.UserName;
-            existingStock.Password = userDto.Password;
-            existingStock.Email = userDto.Email;
-            existingStock.Phone = userDto.Phone;
-            existingStock.Uimage = userDto.Uimage;
-            existingStock.RoleId = userDto.RoleId;
+            existingUser.UserName = userDto.UserName;
+            existingUser.Password = userDto.Password;
+            existingUser.Email = userDto.Email;
+            existingUser.Phone = userDto.Phone;
+            existingUser.Uimage = userDto.Uimage;
+            existingUser.RoleId = userDto.RoleId;
 
             await _context.SaveChangesAsync();
 
-            return existingStock;
+            return existingUser;
         }
     }
 }
