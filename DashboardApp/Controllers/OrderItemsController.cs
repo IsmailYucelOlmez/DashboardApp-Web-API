@@ -6,6 +6,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DashboardApp.Models;
+using DashboardApp.Interfaces;
+using DashboardApp.Repositories;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using DashboardApp.DTO.OrderItem;
+using DashboardApp.Helpers;
+using DashboardApp.Mappers;
+using DashboardApp.DTO.User;
 
 namespace DashboardApp.Controllers
 {
@@ -15,16 +22,23 @@ namespace DashboardApp.Controllers
     {
         private readonly DashboardDbContext _context;
 
-        public OrderItemsController(DashboardDbContext context)
+        private readonly IOrderItemRepository _orderItemRepository;
+
+        public OrderItemsController(DashboardDbContext context, IOrderItemRepository orderItemRepository)
         {
+            _orderItemRepository = orderItemRepository;
             _context = context;
         }
 
         // GET: api/OrderItems
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<OrderItem>>> GetOrderItems()
+        public async Task<ActionResult<IEnumerable<OrderItem>>> GetOrderItems([FromQuery] OrderItemQueryObject query)
         {
-            return await _context.OrderItems.ToListAsync();
+            var orderItems = await _orderItemRepository.GetAllAsync(query);
+
+            var orderItemDto = orderItems.Select(s => s.ToOrderItemDto()).ToList();
+
+            return Ok(orderItemDto);
         }
 
         // GET: api/OrderItems/5
@@ -44,57 +58,41 @@ namespace DashboardApp.Controllers
         // PUT: api/OrderItems/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutOrderItem(int id, OrderItem orderItem)
+        public async Task<IActionResult> PutOrderItem(int id, CreateOrderItemRequsetDto orderItemDto)
         {
-            if (id != orderItem.OrderItemId)
+            var orderItemModel = await _orderItemRepository.UpdateAsync(id, orderItemDto);
+
+            if (orderItemModel == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
-            _context.Entry(orderItem).State = EntityState.Modified;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!OrderItemExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return Ok(orderItemModel.ToOrderItemDto());
         }
 
         // POST: api/OrderItems
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<OrderItem>> PostOrderItem(OrderItem orderItem)
+        public async Task<ActionResult<OrderItem>> PostOrderItem([FromBody] CreateOrderItemRequsetDto orderItemDto)
         {
-            _context.OrderItems.Add(orderItem);
-            await _context.SaveChangesAsync();
+            var orderItemModel = orderItemDto.ToOrderItemFromCreateDto();
 
-            return CreatedAtAction("GetOrderItem", new { id = orderItem.OrderItemId }, orderItem);
+            await _orderItemRepository.CreateAsync(orderItemModel);
+
+            return CreatedAtAction("GetOrderItem", new { id = orderItemModel.OrderItemId }, orderItemModel.ToOrderItemDto());
         }
 
         // DELETE: api/OrderItems/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOrderItem(int id)
         {
-            var orderItem = await _context.OrderItems.FindAsync(id);
+            var orderItem = await _orderItemRepository.DeleteAsync(id);
             if (orderItem == null)
             {
                 return NotFound();
             }
 
-            _context.OrderItems.Remove(orderItem);
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }

@@ -6,6 +6,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DashboardApp.Models;
+using DashboardApp.Interfaces;
+using DashboardApp.Repositories;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using DashboardApp.Helpers;
+using DashboardApp.Mappers;
+using DashboardApp.DTO.Order;
+using DashboardApp.DTO.User;
 
 namespace DashboardApp.Controllers
 {
@@ -15,86 +22,77 @@ namespace DashboardApp.Controllers
     {
         private readonly DashboardDbContext _context;
 
-        public OrdersController(DashboardDbContext context)
+        private readonly IOrderRepository _orderRepository;
+
+        public OrdersController(DashboardDbContext context,IOrderRepository orderRepository)
         {
+            _orderRepository = orderRepository;
             _context = context;
         }
 
         // GET: api/Orders
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Order>>> GetOrders()
+        public async Task<ActionResult<IEnumerable<Order>>> GetOrders([FromQuery] OrderQueryObject query)
         {
-            return await _context.Orders.ToListAsync();
+            var orders = await _orderRepository.GetAllAsync(query);
+
+            var orderdto = orders.Select(s => s.ToOrderDto()).ToList();
+
+            return Ok(orderdto);
         }
 
         // GET: api/Orders/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Order>> GetOrder(int id)
         {
-            var order = await _context.Orders.FindAsync(id);
+            var order = await _orderRepository.GetByIdAsync(id);
 
             if (order == null)
             {
                 return NotFound();
             }
 
-            return order;
+            return Ok(order.ToOrderDto());
         }
 
         // PUT: api/Orders/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutOrder(int id, Order order)
+        public async Task<IActionResult> PutOrder(int id, CreateOrderRequestDto orderDto)
         {
-            if (id != order.OrderId)
+            var orderModel = await _orderRepository.UpdateAsync(id, orderDto);
+
+            if (orderModel == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
-            _context.Entry(order).State = EntityState.Modified;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!OrderExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return Ok(orderModel.ToOrderDto());
         }
 
         // POST: api/Orders
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Order>> PostOrder(Order order)
+        public async Task<ActionResult<Order>> PostOrder([FromBody] CreateOrderRequestDto orderDto)
         {
-            _context.Orders.Add(order);
-            await _context.SaveChangesAsync();
+            var orderModel = orderDto.ToOrderFromCreateDto();
 
-            return CreatedAtAction("GetOrder", new { id = order.OrderId }, order);
+            await _orderRepository.CreateAsync(orderModel);
+
+            return CreatedAtAction("GetOrder", new { id = orderModel.OrderId }, orderModel.ToOrderDto());
         }
 
         // DELETE: api/Orders/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOrder(int id)
         {
-            var order = await _context.Orders.FindAsync(id);
+            var order = await _orderRepository.DeleteAsync(id);
             if (order == null)
             {
                 return NotFound();
             }
 
-            _context.Orders.Remove(order);
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }

@@ -1,9 +1,9 @@
 ﻿namespace DashboardApp.Helpers
 {
-    public class QueryObject
+    public class TaskQueryObject
     {
-        public string? UserName { get; set; } = null;
-        public string? Email { get; set; } = null;
+        public string? TaskTitle { get; set; } = null;
+        public int AssignedUserId { get; set; }
         public string? SortBy { get; set; } = null;
         public bool IsDecsending { get; set; } = false;
         public int PageNumber { get; set; } = 1;

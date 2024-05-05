@@ -6,7 +6,7 @@ namespace DashboardApp.Mappers
 {
     public static class OrderItemMapper
     {
-        public static OrderItemDto ToUserDto(this OrderItem orderItemModel)
+        public static OrderItemDto ToOrderItemDto(this OrderItem orderItemModel)
         {
             return new OrderItemDto
             {
@@ -18,7 +18,7 @@ namespace DashboardApp.Mappers
             };
         }
 
-        public static OrderItem ToUserFromCreateDto(this CreateOrderItemRequsetDto orderItemDto)
+        public static OrderItem ToOrderItemFromCreateDto(this CreateOrderItemRequsetDto orderItemDto)
         {
             return new OrderItem
             {

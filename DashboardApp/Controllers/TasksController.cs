@@ -7,6 +7,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DashboardApp.Models;
 using DashboardTask = DashboardApp.Models.Task;
+using DashboardApp.Interfaces;
+using DashboardApp.Repositories;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using DashboardApp.Helpers;
+using DashboardApp.Mappers;
+using DashboardApp.DTO.Task;
+using DashboardApp.DTO.User;
 
 namespace DashboardApp.Controllers
 {
@@ -16,93 +23,84 @@ namespace DashboardApp.Controllers
     {
         private readonly DashboardDbContext _context;
 
-        public TasksController(DashboardDbContext context)
+        private readonly ITaskRepository _taskRepository;
+
+        public TasksController(DashboardDbContext context, ITaskRepository taskRepository)
         {
+            _taskRepository = taskRepository;
             _context = context;
         }
 
         // GET: api/Tasks
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DashboardTask>>> GetTasks()
+        public async Task<ActionResult<IEnumerable<DashboardTask>>> GetTasks([FromQuery] TaskQueryObject query)
         {
-            return await _context.Tasks.ToListAsync();
+            var tasks = await _taskRepository.GetAllAsync(query);
+
+            var taskdto = tasks.Select(s => s.ToTaskDto()).ToList();
+
+            return Ok(taskdto);
         }
 
         // GET: api/Tasks/5
         [HttpGet("{id}")]
         public async Task<ActionResult<DashboardTask>> GetTask(int id)
         {
-            var task = await _context.Tasks.FindAsync(id);
+            var task = await _taskRepository.GetByIdAsync(id);
 
             if (task == null)
             {
                 return NotFound();
             }
 
-            return task;
+            return Ok(task.ToTaskDto());
         }
 
         // PUT: api/Tasks/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTask(int id, DashboardTask task)
+        public async Task<IActionResult> PutTask(int id, CreateTaskRequestDto taskdto)
         {
-            if (id != task.Id)
+            var taskModel = await _taskRepository.UpdateAsync(id, taskdto);
+
+            if (taskModel == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
-            _context.Entry(task).State = EntityState.Modified;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TaskExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return Ok(taskModel.ToTaskDto());
         }
 
         // POST: api/Tasks
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<DashboardTask>> PostTask(DashboardTask task)
+        public async Task<ActionResult<DashboardTask>> PostTask([FromBody] CreateTaskRequestDto taskDto)
         {
-            _context.Tasks.Add(task);
-            await _context.SaveChangesAsync();
+            var taskModel = taskDto.ToTaskFromCreateDto();
 
-            return CreatedAtAction("GetTask", new { id = task.Id }, task);
+            await _taskRepository.CreateAsync(taskModel);
+
+            return CreatedAtAction("GetUser", new { id = taskModel.Id }, taskModel.ToTaskDto());
         }
 
         // DELETE: api/Tasks/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTask(int id)
         {
-            var task = await _context.Tasks.FindAsync(id);
+            var task = await _taskRepository.DeleteAsync(id);
             if (task == null)
             {
                 return NotFound();
             }
 
-            _context.Tasks.Remove(task);
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool TaskExists(int id)
-        {
-            return _context.Tasks.Any(e => e.Id == id);
-        }
+        //private bool TaskExists(int id)
+        //{
+        //    return _context.Tasks.Any(e => e.Id == id);
+        //}
     }
 }

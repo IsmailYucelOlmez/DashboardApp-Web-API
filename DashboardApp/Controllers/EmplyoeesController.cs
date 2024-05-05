@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DashboardApp.Models;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using DashboardApp.Helpers;
 
 namespace DashboardApp.Controllers
 {
@@ -24,6 +26,7 @@ namespace DashboardApp.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Emplyoee>>> GetEmplyoees()
         {
+
             return await _context.Emplyoees.ToListAsync();
         }
 

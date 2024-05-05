@@ -1,9 +1,9 @@
 ﻿namespace DashboardApp.Helpers
 {
-    public class QueryObject
+    public class EmployeeQueryObject
     {
-        public string? UserName { get; set; } = null;
-        public string? Email { get; set; } = null;
+        public string? EName { get; set; } = null;
+        public string? Statu { get; set; } = null;
         public string? SortBy { get; set; } = null;
         public bool IsDecsending { get; set; } = false;
         public int PageNumber { get; set; } = 1;

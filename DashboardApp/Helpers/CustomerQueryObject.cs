@@ -1,9 +1,9 @@
 ﻿namespace DashboardApp.Helpers
 {
-    public class QueryObject
+    public class CustomerQueryObject
     {
-        public string? UserName { get; set; } = null;
-        public string? Email { get; set; } = null;
+        public string? CName { get; set; } = null;
+        public string? CStatu { get; set; } = null;
         public string? SortBy { get; set; } = null;
         public bool IsDecsending { get; set; } = false;
         public int PageNumber { get; set; } = 1;

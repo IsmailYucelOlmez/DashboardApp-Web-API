@@ -6,7 +6,7 @@ namespace DashboardApp.Mappers
 {
     public static class MessageMapper
     {
-        public static MessageDto ToUserDto(this Message messageModel)
+        public static MessageDto ToMessageDto(this Message messageModel)
         {
             return new MessageDto
             {
@@ -20,7 +20,7 @@ namespace DashboardApp.Mappers
             };
         }
 
-        public static Message ToUserFromCreateDto(this CreateMessageRequestDto messageDto)
+        public static Message ToMessageFromCreateDto(this CreateMessageRequestDto messageDto)
         {
             return new Message
             {

@@ -7,7 +7,7 @@ namespace DashboardApp.Mappers
 {
     public static class TaskMapper
     {
-        public static TaskDto ToUserDto(this DashboardTask taskModel)
+        public static TaskDto ToTaskDto(this DashboardTask taskModel)
         {
             return new TaskDto
             {
@@ -19,7 +19,7 @@ namespace DashboardApp.Mappers
             };
         }
 
-        public static DashboardTask ToUserFromCreateDto(this CreateTaskRequestDto taskDto)
+        public static DashboardTask ToTaskFromCreateDto(this CreateTaskRequestDto taskDto)
         {
             return new DashboardTask
             {

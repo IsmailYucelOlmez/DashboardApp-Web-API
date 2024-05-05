@@ -6,7 +6,7 @@ namespace DashboardApp.Mappers
 {
     public static class ProductMapper
     {
-        public static ProductDto ToUserDto(this Product productModel)
+        public static ProductDto ToProductDto(this Product productModel)
         {
             return new ProductDto
             {
@@ -19,7 +19,7 @@ namespace DashboardApp.Mappers
             };
         }
 
-        public static Product ToUserFromCreateDto(this CreateProductRequestDto productDto)
+        public static Product ToProductFromCreateDto(this CreateProductRequestDto productDto)
         {
             return new Product
             {
