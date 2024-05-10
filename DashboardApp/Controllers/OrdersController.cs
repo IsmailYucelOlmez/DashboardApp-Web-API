@@ -77,7 +77,7 @@ namespace DashboardApp.Controllers
         public async Task<ActionResult<Order>> PostOrder([FromBody] CreateOrderRequestDto orderDto)
         {
             var orderModel = orderDto.ToOrderFromCreateDto();
-
+            
             await _orderRepository.CreateAsync(orderModel);
 
             return CreatedAtAction("GetOrder", new { id = orderModel.OrderId }, orderModel.ToOrderDto());
